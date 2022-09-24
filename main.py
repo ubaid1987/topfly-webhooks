@@ -66,13 +66,19 @@ def notification_webhook(
     mt_utc_datetime = datetime.datetime.utcfromtimestamp(mt_epoch)
     now = datetime.datetime.utcnow()
     days_difference = (now - mt_utc_datetime).days
-    if days_difference < 15:
-        return {"message": "mt and current time difference is less 15 days"}
+    # if days_difference < 15:
+    #     return {"message": "mt and current time difference is less 15 days"}
     sn_value = service.get_value_from_company_card_api()
     company_sn = db.query(CompanySN).filter(CompanySN.sn == sn_value).first()
     if not company_sn:
         service.send_command()
-        db.add(CompanySN(sn=sn_value))
+        db.add(
+            CompanySN(
+                sn=sn_value,
+                driver=driver,
+                unitId=unitId,
+            )
+        )
         db.commit()
     else:
         now = datetime.datetime.utcnow()
@@ -80,8 +86,14 @@ def notification_webhook(
         if round(trigger_diff) > 30:
             service.send_command()
             company_sn.trigger_at = now
+            company_sn.driver = driver
+            company_sn.unitId = unitId
             db.add(company_sn)
             db.commit()
             db.refresh(company_sn)
+        else:
+            return {
+                "message": f"Command already triggered at {company_sn.trigger_at} for driver {company_sn.driver}, unitId {company_sn.unitId}",
+            }
 
     return {"message": "Command has been triggered successfully"}

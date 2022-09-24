@@ -9,4 +9,6 @@ class CompanySN(Base):
     __tablename__ = "company_sn"
     id = Column(Integer, primary_key=True, index=True)
     sn = Column(String)
+    driver = Column(String)
+    unitId = Column(String)
     trigger_at = Column(DateTime, default=datetime.utcnow)
