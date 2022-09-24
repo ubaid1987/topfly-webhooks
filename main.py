@@ -7,9 +7,41 @@ from sqlalchemy.orm import Session
 from database import SessionLocal, engine
 from models import Base, CompanySN
 from services.topfly_service import TopflyService
+from starlette.exceptions import HTTPException
+from fastapi.responses import JSONResponse
+import sentry_sdk
+from sentry_sdk import capture_exception
+from config import Settings
+
+setting = Settings()
 
 Base.metadata.create_all(bind=engine)
-app = FastAPI()
+
+sentry_sdk.init(
+    dsn=setting.SENTRY_DNS,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production,
+    traces_sample_rate=1.0,
+)
+
+
+async def http_exception_handler(request, exception):
+    # capture_exception(exception)
+    return JSONResponse(
+        status_code=exception.status_code,
+        content={
+            "detail": exception.detail,
+        },
+    )
+
+
+app = FastAPI(
+    exception_handlers={
+        HTTPException: http_exception_handler,
+    }
+)
+
 
 # Dependency
 def get_db():
