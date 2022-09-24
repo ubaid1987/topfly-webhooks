@@ -7,4 +7,4 @@ pytest
 freezegun==1.2.2
 isort==5.10.1 #sort the code
 black==22.8.0 # format the code
-
+sentry-sdk[fastapi]
