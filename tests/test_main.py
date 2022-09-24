@@ -8,6 +8,8 @@ from sqlalchemy.orm import sessionmaker
 
 from database import Base
 from main import app, get_db
+from models import CompanySN
+from datetime import datetime, timedelta
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 
@@ -73,13 +75,23 @@ def mock_get_value_from_company_card_api(company_card_sn):
         yield
 
 
+@pytest.fixture
+def mock_send_command(send_command_response):
+    with patch(
+        "services.topfly_service.TopflyService.send_command",
+        return_value=send_command_response,
+    ):
+        yield
+
+
 @freeze_time("2022-01-30")
-def test_read_main(
+def test_notification_webhook(
     test_db,
     mock_get_sid,
     mock_get_driver_c_code,
     mock_get_mt_epoch_time,
     mock_get_value_from_company_card_api,
+    mock_send_command,
 ):
     data = {
         "driver": "Zaramella Andrea",
@@ -93,7 +105,7 @@ def test_read_main(
 
 
 @freeze_time("2022-01-02")
-def test_read_main_within_15_days(
+def test_notification_webhook_within_15_days(
     mock_get_sid,
     mock_get_driver_c_code,
     mock_get_mt_epoch_time,
@@ -109,3 +121,69 @@ def test_read_main_within_15_days(
     assert response.status_code == 200
     data = response.json()
     assert data["message"] == "mt and current time difference is less 15 days"
+
+
+@freeze_time("2022-01-30")
+def test_notification_webhook_within_30_minutes(
+    test_db,
+    mock_get_sid,
+    mock_get_driver_c_code,
+    mock_get_mt_epoch_time,
+    mock_get_value_from_company_card_api,
+    company_card_sn,
+    mock_send_command,
+):
+    db = TestingSessionLocal()
+    db.add(
+        CompanySN(
+            sn=company_card_sn,
+            driver="driver",
+            unitId="unitId",
+        )
+    )
+    db.commit()
+    company_sn = db.query(CompanySN).first()
+    data = {
+        "driver": "Zaramella Andrea",
+        "unitId": 23149010,
+        "date": "22.09.2022 19:15:56",
+    }
+    response = client.post("/topfly-webhook/notification/", data=data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["data"] == {
+        "trigger_at": str(company_sn.trigger_at),
+        "driver": company_sn.driver,
+        "unitId": company_sn.unitId,
+    }
+
+
+@freeze_time("2022-01-30")
+def test_notification_webhook_after_30_minutes(
+    test_db,
+    mock_get_sid,
+    mock_get_driver_c_code,
+    mock_get_mt_epoch_time,
+    mock_get_value_from_company_card_api,
+    mock_send_command,
+    company_card_sn,
+):
+    db = TestingSessionLocal()
+    db.add(
+        CompanySN(
+            sn=company_card_sn,
+            driver="driver",
+            unitId="unitId",
+            trigger_at=datetime.now() - timedelta(minutes=31),
+        )
+    )
+    db.commit()
+    data = {
+        "driver": "Zaramella Andrea",
+        "unitId": 23149010,
+        "date": "22.09.2022 19:15:56",
+    }
+    response = client.post("/topfly-webhook/notification/", data=data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"] == "Command has been triggered successfully"

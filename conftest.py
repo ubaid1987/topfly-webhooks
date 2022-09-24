@@ -1,4 +1,5 @@
 import pytest
+from tests.topfly_api_responeses import SEND_COMMAND_API_RESPONSE
 
 
 @pytest.fixture
@@ -24,3 +25,8 @@ def mt_epoch_time():
 @pytest.fixture
 def company_card_sn():
     return "000FD0B7121704A5"
+
+
+@pytest.fixture
+def send_command_response():
+    return SEND_COMMAND_API_RESPONSE
