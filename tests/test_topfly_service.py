@@ -12,6 +12,7 @@ from tests.topfly_api_responeses import (
     DRIVER_FILE_API_RESPONSE,
     INVALID_SID_RESPONSE,
     SEARCH_DRIVER_GROUP_ID_WITH_CODE_API_RESPONSE,
+    SEND_COMMAND_API_RESPONSE,
     TOKEN_LOGIN_API_INVALID_AUTH_TOKEN_RESPONSE,
     TOKEN_LOGIN_API_RESPONSE,
     TOKEN_LOGIN_API_WRONG_TOKEN_LENGTH_RESPONSE,
@@ -147,3 +148,11 @@ def test_get_value_from_company_card_api_with_invalid_sid(mock_get):
         service.get_value_from_company_card_api()
     assert isinstance(exc_info.value, TopflyException)
     assert exc_info.value.status_code == 400
+
+
+@patch("services.topfly_service.requests.get")
+def test_send_command(mock_get):
+    mock_get.return_value = Mock(ok=True)
+    mock_get.return_value.json.return_value = SEND_COMMAND_API_RESPONSE
+    service = TopflyService("sid", "unitId", "driver_name", "date")
+    assert service.send_command() == SEND_COMMAND_API_RESPONSE

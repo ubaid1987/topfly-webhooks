@@ -13,6 +13,7 @@ DRIVER_FILE_API = 'https://hst-api.wialon.com/wialon/ajax.html?svc=file/list&par
 COMPANY_CARD_API = (
     "https://hst-api.wialon.com/wialon/ajax.html?svc=unit/update_hw_params"
 )
+SEND_COMMAND_API = "https://hst-api.wialon.com/wialon/ajax.html?svc=core/batch"
 
 
 class TopflyService:
@@ -85,4 +86,30 @@ class TopflyService:
         raise TopflyException(message=f"No Company sn found from company card API")
 
     def send_command(self):
-        pass
+        params = {
+            "params": [
+                {
+                    "svc": "unit/exec_cmd",
+                    "params": {
+                        "itemId": self.unitId,
+                        "commandName": "Test",
+                        "linkType": "",
+                        "param": "",
+                        "timeout": 60,
+                        "flags": 0,
+                    },
+                }
+            ],
+            "flags": 0,
+        }
+        str_params = json.dumps(params)
+        response = requests.get(
+            f"{SEND_COMMAND_API}&params={str_params}&sid={self.sid}"
+        )
+        data = response.json()
+        if "error" in data:
+            raise TopflyException(
+                data=data,
+                message=f"SEND_COMMAND_API: Failed",
+            )
+        return data
