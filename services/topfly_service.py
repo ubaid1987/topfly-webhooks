@@ -1,10 +1,8 @@
 import json
-import os
-
 import requests
-from fastapi import HTTPException
 
 from config import Settings
+from utils.exception_handler import TopflyException
 
 setting = Settings()
 
@@ -31,9 +29,9 @@ class TopflyService:
         response = requests.get(f"{TOKEN_LOGIN_API}&params={str_params}")
         data = response.json()
         if "error" in data:
-            raise HTTPException(
-                status_code=400,
-                detail=f"TOKEN_LOGIN_API: Failed to get session id with reason {data['reason']}",
+            raise TopflyException(
+                data=data,
+                message=f"TOKEN_LOGIN_API: Failed to get session id with reason {data['reason']}",
             )
         return data["eid"]
 
@@ -43,16 +41,16 @@ class TopflyService:
         )
         data = response.json()
         if "error" in data:
-            raise HTTPException(
-                status_code=400,
-                detail=f"SEARCH_DRIVER_GROUP_ID_WITH_CODE_API: Failed with error {data['error']}. Most likey beacuse of invalid sid",
+            raise TopflyException(
+                data=data,
+                message=f"SEARCH_DRIVER_GROUP_ID_WITH_CODE_API: Failed with error {data['error']}. Most likey beacuse of invalid sid",
             )
         drvrs = data["items"][0]["drvrs"]
         for _, driver in drvrs.items():
             if self.driver == driver["n"]:
                 return driver["c"]
-        raise HTTPException(
-            status_code=400, detail=f"No driver found with name {self.driver}"
+        raise TopflyException(
+            message=f"No driver found with name {self.driver}",
         )
 
     def get_mt_epoch_time(self, c_code: str):
@@ -60,9 +58,9 @@ class TopflyService:
         filtered_list = []
         data_list = response.json()
         if "error" in data_list:
-            raise HTTPException(
-                status_code=400,
-                detail=f"DRIVER_FILE_API: Failed with error {data_list['error']}. Most likey beacuse of invalid sid",
+            raise TopflyException(
+                data=data_list,
+                message=f"DRIVER_FILE_API: Failed with error {data_list['error']}. Most likey beacuse of invalid sid",
             )
         for data in data_list:
             if c_code in data["n"]:
@@ -76,17 +74,15 @@ class TopflyService:
         response = requests.get(f"{COMPANY_CARD_API}&params={params}&sid={self.sid}")
         data_list = response.json()
         if "error" in data_list:
-            raise HTTPException(
-                status_code=400,
-                detail=f"COMPANY_CARD_API: Failed with error {data_list['error']}. Most likey beacuse of invalid sid",
+            raise TopflyException(
+                data=data_list,
+                message=f"COMPANY_CARD_API: Failed with error {data_list['error']}. Most likey beacuse of invalid sid",
             )
         name = "cc_sn"
         for data in data_list:
             if data["name"] == name:
                 return data["value"]
-        raise HTTPException(
-            status_code=400, detail=f"No Company sn found from company card API"
-        )
+        raise TopflyException(message=f"No Company sn found from company card API")
 
     def send_command(self):
         pass

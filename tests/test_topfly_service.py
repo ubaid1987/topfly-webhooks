@@ -1,7 +1,9 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from fastapi import HTTPException
+
+from utils.exception_handler import TopflyException
+from fastapi.exceptions import HTTPException
 
 from config import Settings
 from services.topfly_service import TopflyService
@@ -25,14 +27,16 @@ def test_get_sid_with_invalid_token(mock_get):
         TOKEN_LOGIN_API_INVALID_AUTH_TOKEN_RESPONSE
     )
 
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(TopflyException) as exc_info:
         TopflyService.get_sid()
-    assert isinstance(exc_info.value, HTTPException)
+    assert isinstance(exc_info.value, TopflyException)
+    print("ehereeee........")
     assert exc_info.value.status_code == 400
     assert (
-        exc_info.value.detail
+        exc_info.value.message
         == "TOKEN_LOGIN_API: Failed to get session id with reason INVALID_AUTH_TOKEN"
     )
+    assert exc_info.value.data == TOKEN_LOGIN_API_INVALID_AUTH_TOKEN_RESPONSE
 
 
 @patch("services.topfly_service.requests.get")
@@ -42,14 +46,15 @@ def test_get_sid_with_wrong_token_length(mock_get):
         TOKEN_LOGIN_API_WRONG_TOKEN_LENGTH_RESPONSE
     )
 
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(TopflyException) as exc_info:
         TopflyService.get_sid()
-    assert isinstance(exc_info.value, HTTPException)
+    assert isinstance(exc_info.value, TopflyException)
     assert exc_info.value.status_code == 400
     assert (
-        exc_info.value.detail
+        exc_info.value.message
         == "TOKEN_LOGIN_API: Failed to get session id with reason WRONG_TOKEN_LENGTH"
     )
+    assert exc_info.value.data == TOKEN_LOGIN_API_WRONG_TOKEN_LENGTH_RESPONSE
 
 
 @patch("services.topfly_service.requests.get")
@@ -78,14 +83,15 @@ def test_get_driver_c_code_with_invalid_sid(mock_get):
     from services.topfly_service import TopflyService
 
     service = TopflyService("invalid_sid", "unitId", "driver", "date")
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(TopflyException) as exc_info:
         service.get_driver_c_code()
-    assert isinstance(exc_info.value, HTTPException)
+    assert isinstance(exc_info.value, TopflyException)
     assert exc_info.value.status_code == 400
     assert (
-        exc_info.value.detail
+        exc_info.value.message
         == "SEARCH_DRIVER_GROUP_ID_WITH_CODE_API: Failed with error 1. Most likey beacuse of invalid sid"
     )
+    assert exc_info.value.data == INVALID_SID_RESPONSE
 
 
 @patch("services.topfly_service.requests.get")
@@ -96,11 +102,11 @@ def test_get_driver_c_code_with_invalid_driver_name(mock_get):
     )
 
     service = TopflyService("sid", "unitId", "invalid_driver", "date")
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(TopflyException) as exc_info:
         service.get_driver_c_code()
-    assert isinstance(exc_info.value, HTTPException)
+    assert isinstance(exc_info.value, TopflyException)
     assert exc_info.value.status_code == 400
-    assert exc_info.value.detail == "No driver found with name invalid_driver"
+    assert exc_info.value.message == "No driver found with name invalid_driver"
 
 
 @patch("services.topfly_service.requests.get")
@@ -117,9 +123,9 @@ def test_get_mt_epoch_time_with_invalid_sid(mock_get):
     mock_get.return_value.json.return_value = INVALID_SID_RESPONSE
 
     service = TopflyService("invalid_sid", "unitId", "driver", "date")
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(TopflyException) as exc_info:
         service.get_mt_epoch_time("c")
-    assert isinstance(exc_info.value, HTTPException)
+    assert isinstance(exc_info.value, TopflyException)
     assert exc_info.value.status_code == 400
 
 
@@ -137,11 +143,7 @@ def test_get_value_from_company_card_api_with_invalid_sid(mock_get):
     mock_get.return_value.json.return_value = INVALID_SID_RESPONSE
 
     service = TopflyService("invalid_sid", "unitId", "driver", "date")
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(TopflyException) as exc_info:
         service.get_value_from_company_card_api()
-    assert isinstance(exc_info.value, HTTPException)
+    assert isinstance(exc_info.value, TopflyException)
     assert exc_info.value.status_code == 400
-
-
-# https://stackoverflow.com/questions/23159257/python-mock-multiple-calls-with-different-results
-# integration testing
