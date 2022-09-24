@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 import sentry_sdk
 from sentry_sdk import capture_exception
 from config import Settings
+from utils.exception_handler import add_topfly_exception_handler
 from utils.resp import TopflyResponse
 
 setting = Settings()
@@ -43,6 +44,8 @@ app = FastAPI(
     }
 )
 
+add_topfly_exception_handler(app)
+
 
 # Dependency
 def get_db():
@@ -67,8 +70,8 @@ def notification_webhook(
     mt_utc_datetime = datetime.datetime.utcfromtimestamp(mt_epoch)
     now = datetime.datetime.utcnow()
     days_difference = (now - mt_utc_datetime).days
-    # if days_difference < 15:
-    #     return TopflyResponse(message="mt and current time difference is less 15 days")
+    if days_difference < 15:
+        return TopflyResponse(message="mt and current time difference is less 15 days")
     sn_value = service.get_value_from_company_card_api()
     company_sn = db.query(CompanySN).filter(CompanySN.sn == sn_value).first()
     if not company_sn:

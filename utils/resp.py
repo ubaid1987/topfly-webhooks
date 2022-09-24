@@ -1,6 +1,4 @@
 from fastapi.responses import JSONResponse
-import json
-
 
 def TopflyResponse(status_code: int = 200, message: str = "", data={}):
     return JSONResponse(
