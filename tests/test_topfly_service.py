@@ -2,21 +2,14 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from utils.exception_handler import TopflyException
-from fastapi.exceptions import HTTPException
-
 from config import Settings
 from services.topfly_service import TopflyService
 from tests.topfly_api_responeses import (
-    COMPANY_CARD_API_RESPONSE,
-    DRIVER_FILE_API_RESPONSE,
-    INVALID_SID_RESPONSE,
-    SEARCH_DRIVER_GROUP_ID_WITH_CODE_API_RESPONSE,
-    SEND_COMMAND_API_RESPONSE,
-    TOKEN_LOGIN_API_INVALID_AUTH_TOKEN_RESPONSE,
-    TOKEN_LOGIN_API_RESPONSE,
-    TOKEN_LOGIN_API_WRONG_TOKEN_LENGTH_RESPONSE,
-)
+    COMPANY_CARD_API_RESPONSE, DRIVER_FILE_API_RESPONSE, INVALID_SID_RESPONSE,
+    SEARCH_DRIVER_GROUP_ID_WITH_CODE_API_RESPONSE, SEND_COMMAND_API_RESPONSE,
+    TOKEN_LOGIN_API_INVALID_AUTH_TOKEN_RESPONSE, TOKEN_LOGIN_API_RESPONSE,
+    TOKEN_LOGIN_API_WRONG_TOKEN_LENGTH_RESPONSE)
+from utils.exception_handler import TopflyException
 
 setting = Settings()
 

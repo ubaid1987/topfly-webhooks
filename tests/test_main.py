@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -9,7 +10,6 @@ from sqlalchemy.orm import sessionmaker
 from database import Base
 from main import app, get_db
 from models import CompanySN
-from datetime import datetime, timedelta
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 

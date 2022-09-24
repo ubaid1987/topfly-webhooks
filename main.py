@@ -1,17 +1,16 @@
 import datetime
 
-import requests
+import sentry_sdk
 from fastapi import Depends, FastAPI, Form
+from fastapi.responses import JSONResponse
+from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
+from starlette.exceptions import HTTPException
 
+from config import Settings
 from database import SessionLocal, engine
 from models import Base, CompanySN
 from services.topfly_service import TopflyService
-from starlette.exceptions import HTTPException
-from fastapi.responses import JSONResponse
-import sentry_sdk
-from sentry_sdk import capture_exception
-from config import Settings
 from utils.exception_handler import add_topfly_exception_handler
 from utils.resp import TopflyResponse
 

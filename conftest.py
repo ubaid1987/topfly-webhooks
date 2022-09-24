@@ -1,4 +1,5 @@
 import pytest
+
 from tests.topfly_api_responeses import SEND_COMMAND_API_RESPONSE
 
 
