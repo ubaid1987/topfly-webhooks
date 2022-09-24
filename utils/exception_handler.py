@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 
 from .resp import TopflyResponse
+from sentry_sdk import capture_exception
 
 
 class TopflyException(Exception):
@@ -21,7 +22,7 @@ def add_topfly_exception_handler(app: FastAPI) -> None:
     @app.exception_handler(TopflyException)
     async def topfly_exception_handler(request: Request, exc: TopflyException):
         if exc.send_sentry:
-            pass
+            capture_exception(exc)
         return TopflyResponse(
             status_code=exc.status_code,
             message=exc.message,

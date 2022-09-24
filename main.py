@@ -2,10 +2,7 @@ import datetime
 
 import sentry_sdk
 from fastapi import Depends, FastAPI, Form
-from fastapi.responses import JSONResponse
-from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
-from starlette.exceptions import HTTPException
 
 from config import Settings
 from database import SessionLocal, engine
@@ -26,22 +23,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0,
 )
 
-
-async def http_exception_handler(request, exception):
-    # capture_exception(exception)
-    return JSONResponse(
-        status_code=exception.status_code,
-        content={
-            "detail": exception.detail,
-        },
-    )
-
-
-app = FastAPI(
-    exception_handlers={
-        HTTPException: http_exception_handler,
-    }
-)
+app = FastAPI()
 
 add_topfly_exception_handler(app)
 
