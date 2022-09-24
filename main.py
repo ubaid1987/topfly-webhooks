@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 import sentry_sdk
 from sentry_sdk import capture_exception
 from config import Settings
+from utils.resp import TopflyResponse
 
 setting = Settings()
 
@@ -66,8 +67,8 @@ def notification_webhook(
     mt_utc_datetime = datetime.datetime.utcfromtimestamp(mt_epoch)
     now = datetime.datetime.utcnow()
     days_difference = (now - mt_utc_datetime).days
-    if days_difference < 15:
-        return {"message": "mt and current time difference is less 15 days"}
+    # if days_difference < 15:
+    #     return TopflyResponse(message="mt and current time difference is less 15 days")
     sn_value = service.get_value_from_company_card_api()
     company_sn = db.query(CompanySN).filter(CompanySN.sn == sn_value).first()
     if not company_sn:
@@ -92,8 +93,13 @@ def notification_webhook(
             db.commit()
             db.refresh(company_sn)
         else:
-            return {
-                "message": f"Command already triggered at {company_sn.trigger_at} for driver {company_sn.driver}, unitId {company_sn.unitId}",
-            }
+            return TopflyResponse(
+                data={
+                    "trigger_at": str(company_sn.trigger_at),
+                    "driver": company_sn.driver,
+                    "unitId": company_sn.unitId,
+                },
+                message=f"Command already triggered at {company_sn.trigger_at} for driver {company_sn.driver}, unitId {company_sn.unitId}",
+            )
 
-    return {"message": "Command has been triggered successfully"}
+    return TopflyResponse(message="Command has been triggered successfully")
