@@ -66,8 +66,8 @@ def notification_webhook(
     mt_utc_datetime = datetime.datetime.utcfromtimestamp(mt_epoch)
     now = datetime.datetime.utcnow()
     days_difference = (now - mt_utc_datetime).days
-    # if days_difference < 15:
-    #     return {"message": "mt and current time difference is less 15 days"}
+    if days_difference < 15:
+        return {"message": "mt and current time difference is less 15 days"}
     sn_value = service.get_value_from_company_card_api()
     company_sn = db.query(CompanySN).filter(CompanySN.sn == sn_value).first()
     if not company_sn:
