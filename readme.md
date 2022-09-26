@@ -7,4 +7,4 @@
 - Run the using the command `pytest` (for printing the logs, use flag `-s -v`)
 - Run the application using `uvicorn main:app --reload`
 
-Note: No need to set `SENTRY_DNS` in `env` for local development
+Note: No need to set `SENTRY_DNS` in `env` for local development 
