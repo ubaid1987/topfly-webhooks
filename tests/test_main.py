@@ -84,10 +84,20 @@ def mock_send_command(send_command_response):
         yield
 
 
+@pytest.fixture
+def mock_get_bact(get_bact):
+    with patch(
+        "services.topfly_service.TopflyService.get_bact",
+        return_value=get_bact,
+    ):
+        yield
+
+
 @freeze_time("2022-01-30")
 def test_notification_webhook(
     test_db,
     mock_get_sid,
+    mock_get_bact,
     mock_get_driver_c_code,
     mock_get_mt_epoch_time,
     mock_get_value_from_company_card_api,
@@ -107,6 +117,7 @@ def test_notification_webhook(
 @freeze_time("2022-01-02")
 def test_notification_webhook_within_15_days(
     mock_get_sid,
+    mock_get_bact,
     mock_get_driver_c_code,
     mock_get_mt_epoch_time,
     mock_get_value_from_company_card_api,
@@ -127,6 +138,7 @@ def test_notification_webhook_within_15_days(
 def test_notification_webhook_within_30_minutes(
     test_db,
     mock_get_sid,
+    mock_get_bact,
     mock_get_driver_c_code,
     mock_get_mt_epoch_time,
     mock_get_value_from_company_card_api,
@@ -162,6 +174,7 @@ def test_notification_webhook_within_30_minutes(
 def test_notification_webhook_after_30_minutes(
     test_db,
     mock_get_sid,
+    mock_get_bact,
     mock_get_driver_c_code,
     mock_get_mt_epoch_time,
     mock_get_value_from_company_card_api,

@@ -31,3 +31,8 @@ def company_card_sn():
 @pytest.fixture
 def send_command_response():
     return SEND_COMMAND_API_RESPONSE
+
+@pytest.fixture
+def get_bact():
+    return 23080205
+

@@ -2951,6 +2951,44 @@ COMPANY_CARD_API_RESPONSE = [
     },
 ]
 
+GET_BACT_API_RESPONSE = {
+    "searchSpec": {
+        "itemsType": "avl_resource",
+        "propName": "drivers",
+        "propValueMask": "Zaramella Andrea",
+        "sortType": "drivers",
+        "propType": "propitemname",
+        "or_logic": "0",
+    },
+    "dataFlags": 4,
+    "totalItemsCount": 1,
+    "indexFrom": 0,
+    "indexTo": 0,
+    "items": [
+        {
+            "crt": 23080204,
+            "bact": 23080205,
+            "bpact": 16832979,
+        }
+    ],
+}
+
+GET_BACT_API_EMPTY_ITEMS_RESPONSE = {
+    "searchSpec": {
+        "itemsType": "avl_resource",
+        "propName": "drivers",
+        "propValueMask": "Zaramella Andrea",
+        "sortType": "drivers",
+        "propType": "propitemname",
+        "or_logic": "0",
+    },
+    "dataFlags": 4,
+    "totalItemsCount": 1,
+    "indexFrom": 0,
+    "indexTo": 0,
+    "items": [],
+}
+
 INVALID_SID_RESPONSE = {"error": 1}
 
 SEND_COMMAND_API_RESPONSE = [{}]
