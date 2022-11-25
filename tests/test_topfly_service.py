@@ -5,10 +5,17 @@ import pytest
 from config import Settings
 from services.topfly_service import TopflyService
 from tests.topfly_api_responeses import (
-    COMPANY_CARD_API_RESPONSE, DRIVER_FILE_API_RESPONSE, INVALID_SID_RESPONSE,
-    SEARCH_DRIVER_GROUP_ID_WITH_CODE_API_RESPONSE, SEND_COMMAND_API_RESPONSE,
-    TOKEN_LOGIN_API_INVALID_AUTH_TOKEN_RESPONSE, TOKEN_LOGIN_API_RESPONSE,
-    TOKEN_LOGIN_API_WRONG_TOKEN_LENGTH_RESPONSE)
+    COMPANY_CARD_API_RESPONSE,
+    DRIVER_FILE_API_RESPONSE,
+    GET_BACT_API_EMPTY_ITEMS_RESPONSE,
+    GET_BACT_API_RESPONSE,
+    INVALID_SID_RESPONSE,
+    SEARCH_DRIVER_GROUP_ID_WITH_CODE_API_RESPONSE,
+    SEND_COMMAND_API_RESPONSE,
+    TOKEN_LOGIN_API_INVALID_AUTH_TOKEN_RESPONSE,
+    TOKEN_LOGIN_API_RESPONSE,
+    TOKEN_LOGIN_API_WRONG_TOKEN_LENGTH_RESPONSE,
+)
 from utils.exception_handler import TopflyException
 
 setting = Settings()
@@ -108,7 +115,7 @@ def test_get_mt_epoch_time(mock_get, c_code):
     mock_get.return_value = Mock(ok=True)
     mock_get.return_value.json.return_value = DRIVER_FILE_API_RESPONSE
     service = TopflyService("sid", "unitId", "driver_name", "date")
-    assert service.get_mt_epoch_time(c_code) == 1663944440
+    assert service.get_mt_epoch_time(c_code, 0000) == 1663944440
 
 
 @patch("services.topfly_service.requests.get")
@@ -118,7 +125,7 @@ def test_get_mt_epoch_time_with_invalid_sid(mock_get):
 
     service = TopflyService("invalid_sid", "unitId", "driver", "date")
     with pytest.raises(TopflyException) as exc_info:
-        service.get_mt_epoch_time("c")
+        service.get_mt_epoch_time("c", 0000)
     assert isinstance(exc_info.value, TopflyException)
     assert exc_info.value.status_code == 400
 
@@ -149,3 +156,34 @@ def test_send_command(mock_get):
     mock_get.return_value.json.return_value = SEND_COMMAND_API_RESPONSE
     service = TopflyService("sid", "unitId", "driver_name", "date")
     assert service.send_command() == SEND_COMMAND_API_RESPONSE
+
+
+@patch("services.topfly_service.requests.get")
+def test_get_bact(mock_get):
+    mock_get.return_value = Mock(ok=True)
+    mock_get.return_value.json.return_value = GET_BACT_API_RESPONSE
+    service = TopflyService("sid", "unitId", "driver_name", "date")
+    assert service.get_bact() == 23080205
+
+
+@patch("services.topfly_service.requests.get")
+def test_get_bact_with_invalid_driver(mock_get):
+    mock_get.return_value = Mock(ok=True)
+    mock_get.return_value.json.return_value = GET_BACT_API_EMPTY_ITEMS_RESPONSE
+    service = TopflyService("sid", "unitId", "driver_name", "date")
+    with pytest.raises(TopflyException) as exc_info:
+        service.get_bact()
+    assert isinstance(exc_info.value, TopflyException)
+    assert exc_info.value.status_code == 400
+
+
+@patch("services.topfly_service.requests.get")
+def test_get_bact_with_invalid_sid(mock_get):
+    mock_get.return_value = Mock(ok=True)
+    mock_get.return_value.json.return_value = INVALID_SID_RESPONSE
+    service = TopflyService("sid", "unitId", "driver_name", "date")
+    with pytest.raises(TopflyException) as exc_info:
+        service.get_bact()
+    assert isinstance(exc_info.value, TopflyException)
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.data == INVALID_SID_RESPONSE
